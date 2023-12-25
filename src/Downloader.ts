@@ -1,3 +1,4 @@
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
@@ -9,6 +10,7 @@ import { FormatConverter } from './FormatConverter';
 import { SongTagsSearch } from './SongTagsSearch';
 import { YtdlMp3Error, isDirectory, removeParenthesizedText } from './utils';
 
+
 export interface DownloaderOptions {
   outputDir?: string;
   getTags?: boolean;
@@ -17,17 +19,16 @@ export interface DownloaderOptions {
 
 export class Downloader {
   static defaultDownloadsDir = path.join(os.homedir(), 'Downloads');
+  static i = 0;
 
   outputDir: string;
   getTags: boolean;
   verifyTags: boolean;
-  i: number;
 
   constructor({ outputDir, getTags, verifyTags }: DownloaderOptions) {
     this.outputDir = outputDir ?? Downloader.defaultDownloadsDir;
     this.getTags = Boolean(getTags);
     this.verifyTags = Boolean(verifyTags);
-    this.i = 0;
   }
 
   async downloadSong(url: string): Promise<string> {
@@ -43,8 +44,13 @@ export class Downloader {
     const formatConverter = new FormatConverter();
     const songTagsSearch = new SongTagsSearch(videoInfo.videoDetails);
 
-    const videoTitle = videoInfo.videoDetails.title || 'Untitled' + this.i++;
-    const outputFile = this.getOutputFile(videoTitle);
+    const outputFile = this.getOutputFile(videoInfo.videoDetails.title);
+    // check if outputfile already exists
+    if (fs.existsSync(outputFile)) {
+      console.log(`File already exists: ${outputFile}`);
+      return outputFile;
+    }
+
     const videoData = await this.downloadVideo(videoInfo);
 
     formatConverter.videoToAudio(videoData, outputFile);
@@ -76,12 +82,13 @@ export class Downloader {
 
   /** Returns the absolute path to the audio file to be downloaded */
   private getOutputFile(videoTitle: string): string {
-    const baseFileName = removeParenthesizedText(videoTitle)
+    let baseFileName = removeParenthesizedText(videoTitle)
       .replace(/[^a-z0-9]/gi, '_')
       .split('_')
       .filter((element) => element)
       .join('_')
       .toLowerCase();
+    baseFileName = baseFileName.length > 0 ? baseFileName : 'untitled' + Downloader.i++;
     return path.join(this.outputDir, baseFileName + '.mp3');
   }
 }
