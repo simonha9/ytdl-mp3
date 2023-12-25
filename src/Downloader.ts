@@ -21,11 +21,13 @@ export class Downloader {
   outputDir: string;
   getTags: boolean;
   verifyTags: boolean;
+  i: number;
 
   constructor({ outputDir, getTags, verifyTags }: DownloaderOptions) {
     this.outputDir = outputDir ?? Downloader.defaultDownloadsDir;
     this.getTags = Boolean(getTags);
     this.verifyTags = Boolean(verifyTags);
+    this.i = 0;
   }
 
   async downloadSong(url: string): Promise<string> {
@@ -41,7 +43,8 @@ export class Downloader {
     const formatConverter = new FormatConverter();
     const songTagsSearch = new SongTagsSearch(videoInfo.videoDetails);
 
-    const outputFile = this.getOutputFile(videoInfo.videoDetails.title);
+    const videoTitle = videoInfo.videoDetails.title || 'Untitled' + this.i++;
+    const outputFile = this.getOutputFile(videoTitle);
     const videoData = await this.downloadVideo(videoInfo);
 
     formatConverter.videoToAudio(videoData, outputFile);
