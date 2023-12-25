@@ -58,7 +58,7 @@
     "ffmpeg-static": "^5.2.0",
     "node-id3": "^0.2.6",
     "ytdl-core": "4.11.5",
-    "ytdl-mp3": "^3.4.0"
+    "ytdl-mp3": "github:simonha9/ytdl-mp3"
   },
   "devDependencies": {
     "@joshunrau/eslint-config": "^2.1.3",
