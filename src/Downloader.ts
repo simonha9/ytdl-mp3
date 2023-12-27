@@ -31,7 +31,7 @@ export class Downloader {
     this.verifyTags = Boolean(verifyTags);
   }
 
-  async downloadSong(url: string): Promise<string> {
+  async downloadSong(url: string, title: string, artist: string): Promise<string> {
     if (!isDirectory(this.outputDir)) {
       throw new YtdlMp3Error(`Not a directory: ${this.outputDir}`);
     }
@@ -41,10 +41,11 @@ export class Downloader {
       });
     });
 
+    const videoTitle = `${title} - ${artist}`
     const formatConverter = new FormatConverter();
-    const songTagsSearch = new SongTagsSearch(videoInfo.videoDetails);
+    const songTagsSearch = new SongTagsSearch(videoTitle);
 
-    const outputFile = this.getOutputFile(videoInfo.videoDetails.title);
+    const outputFile = this.getOutputFile(videoTitle);
     // check if outputfile already exists
     if (fs.existsSync(outputFile)) {
       console.log(`File already exists: ${outputFile}`);
